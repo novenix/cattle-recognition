@@ -1,0 +1,46 @@
+# Python virtual environment
+.venv/
+
+# Jupyter notebook checkpoints
+notebooks/.ipynb_checkpoints/
+
+# Compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Data directories (large files, not tracked)
+src/data/detection/
+src/data/identification/
+
+# Model files (large, generated)
+models/detection/
+models/identification/
+models/optimized/
+
+# Logs and outputs
+*.log
+*.out
+*.tmp
+
+# System files
+.DS_Store
+Thumbs.db
+
+# VSCode settings
+.vscode/
+
+# Test results
+*.pytest_cache/
+
+# Ignore dataset analysis reports (optional)
+data/dataset_analysis_report.json
+
+# Ignore deployment artifacts
+deployment/
+
+# Ignore environment files
+.env
+
+

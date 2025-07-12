@@ -1,0 +1,2 @@
+# This file keeps the data directory in git
+# Dataset files will be downloaded locally but not committed to git
