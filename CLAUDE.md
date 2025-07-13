@@ -116,6 +116,209 @@ cattle-recognition/
 - Requirements: Real-time processing capability
 - Model optimization: TensorRT, ONNX, or similar
 
+## AI Assistant Behavior Guidelines
+
+Here is a comprehensive and detailed guide, structured as a step-by-step reasoning process, for approaching any computer vision problem. This is the "master prompt" that you AI agent should follow to analyze and propose a robust solution.
+
+### Phase 1: Holistic Problem Understanding and Business Context
+
+Before thinking about pixels or models, we must understand the *why*. A technically perfect model that doesn't solve the business problem is a failure.
+
+**1.1. Defining the Ultimate Goal**
+
+* **Main Question:** What real problem are we trying to solve? What is the business objective or the end-user's need?
+* **Example:** We aren't just "detecting cars"; we are "automating vehicle counting to optimize traffic management at a toll booth and reduce wait times."
+* **Supporting Questions:**
+    * Who are the stakeholders? What do they expect from this system?
+    * How is success measured in business terms? (e.g., cost reduction by X%, efficiency increase by Y%, improved safety, etc.)
+    * How is this task currently performed, if at all? Is it a manual process? What are its limitations?
+    * What is the impact of an error? Is a false positive (detecting something that isn't there) worse than a false negative (failing to detect something that is), or vice versa?
+        * **Medical Diagnosis Example:** A false negative (missing a disease) is catastrophic.
+        * **Fashion Recommender Example:** A false positive (suggesting an irrelevant product) is just a minor annoyance.
+
+**1.2. Constraints and Operating Environment**
+
+* **Main Question:** What are the non-negotiable limitations of the project?
+* **Supporting Questions:**
+    * **Hardware:** Where will the solution run? On a cloud server with powerful GPUs (e.g., AWS, GCP), on a local server (on-premise), on an embedded device (e.g., Jetson Nano, Raspberry Pi), or on a mobile phone? This defines our computational, memory, and power constraints.
+    * **Performance:** How fast must the response be (latency)? How many images/videos per second must it process (throughput)? Does it need to be real-time?
+    * **Budget:** What is the budget for development, computation (training and deployment), and maintenance?
+    * **Ethics and Privacy:** Does the data involve people? Do we need to anonymize faces or license plates? Are there potential biases in the data that could lead to discrimination?
+
+### Phase 2: In-depth Data Analysis (Inputs and Outputs)
+
+Data is the fuel for any Computer Vision solution. Its characteristics dictate the project's feasibility and approach.
+
+**2.1. The Inputs**
+
+* **Main Question:** What do the data that the system will analyze look like?
+* **Supporting Questions:**
+    * **Data Type:** Are they static images, video frames, a live video stream, multispectral images (infrared, thermal), depth images (RGB-D), or data from a medical scanner (DICOM)?
+    * **Quality and Quantity:**
+        * How much data do we have available? Tens, hundreds, thousands, millions?
+        * What is the resolution of the images/videos? Is it consistent?
+        * Is the data already labeled? If not, who will label it, and how will the quality of the labels be ensured?
+        * Is the data clean or noisy? (e.g., blurry images, low light, artifacts).
+    * **Capture Conditions:**
+        * How do lighting conditions vary (day, night, shadows, backlight)?
+        * From what angle or perspective is the image captured (frontal, top-down, side)? Is it fixed or variable?
+        * Can the object of interest be partially occluded (covered by other objects)?
+        * How does the background vary? Is it a static, controlled background or a dynamic, chaotic one?
+
+**2.2. The Outputs**
+
+* **Main Question:** What precise information should the system generate as a response?
+* **Supporting Questions:**
+    * **Output Format:** Is the output a single label for the entire image (e.g., "Cat"), the coordinates of a bounding box, a pixel mask, a keypoint, text, a number (count), or a newly generated image?
+    * **Level of Detail:** Do we just need to know if there is a "car," or do we need to know the make, model, and color? Do we need the exact silhouette of the car?
+    * **Output Structure:** Is the output a JSON file, a database entry, a real-time alert, or a visual overlay on the original video?
+
+### Phase 3: Technical Problem Formulation
+
+Here, we translate the business problem and data specifications into a canonical Computer Vision task.
+
+**Main Question:** Based on the inputs and outputs, what is the fundamental Computer Vision task we need to solve?
+
+**Possibilities (from simplest to most complex):**
+
+* **Image Classification:**
+    * **When:** When you need to assign a single label to an entire image.
+    * **Input:** An image.
+    * **Output:** A text string or class ID (e.g., "Dog," "Cat," "Normal," "Anomalous").
+    * **Example:** Classifying whether a chest X-ray shows signs of pneumonia or not.
+
+* **Classification + Localization:**
+    * **When:** When you need to identify the main object in an image and draw a box around it. It assumes there is only one object of interest.
+    * **Input:** An image.
+    * **Output:** A class + coordinates of a bounding box `[x_min, y_min, x_max, y_max]`.
+    * **Example:** Finding a person's face in a profile picture.
+
+* **Object Detection:**
+    * **When:** When you need to find multiple objects in an image, locate them with bounding boxes, and classify them.
+    * **Input:** An image.
+    * **Output:** A list of objects, where each has `[class, confidence, bounding_box]`.
+    * **Example:** Detecting all cars, pedestrians, and traffic lights in a traffic scene.
+
+* **Semantic Segmentation:**
+    * **When:** When you need to classify every pixel in the image. It does not distinguish between instances of the same class.
+    * **Input:** An image.
+    * **Output:** A segmentation map (an image where each pixel's color corresponds to a class).
+    * **Example:** In an aerial image, coloring all "road" pixels gray, "building" pixels blue, and "vegetation" pixels green.
+
+* **Instance Segmentation:**
+    * **When:** When you need to classify each pixel and also differentiate between different instances of the same object. It is the most granular task.
+    * **Input:** An image.
+    * **Output:** A segmentation map where each individual object has a unique color.
+    * **Example:** In the aerial image, coloring each individual building with a different color.
+
+* **Pose Estimation / Keypoint Detection:**
+    * **When:** When you need to detect specific points of an object (joints, corners, etc.).
+    * **Input:** An image.
+    * **Output:** Coordinates `(x, y)` for each keypoint of interest.
+    * **Example:** Detecting the position of a person's elbows, wrists, and shoulders to analyze their posture.
+
+* **Optical Character Recognition (OCR):**
+    * **When:** When you need to extract text from an image.
+    * **Input:** An image with text.
+    * **Output:** A text string.
+    * **Example:** Reading a license plate number or extracting text from a scanned document.
+
+* **Content-Based Image Retrieval (CBIR):**
+    * **When:** When you need to find visually similar images to a query image.
+    * **Input:** An image.
+    * **Output:** A list of images from a database, sorted by similarity.
+    * **Example:** A "similar images" search feature on an e-commerce site.
+
+* **Generative Tasks:**
+    * **When:** When you need to create new visual data.
+    * **Input:** Noise, text, or another image.
+    * **Output:** A new, synthetic image.
+    * **Example:** Creating faces of people who don't exist, or colorizing a black and white image.
+
+### Phase 4: Solution Approach and Method Selection
+
+With the problem well-defined, we explore the *how*.
+
+**Main Question:** What family of algorithms and which specific model is most suitable given our constraints, data, and the formulated task?
+
+**Decision Tree of Methods:**
+
+**Option 1: Can it be solved without Machine Learning? (Heuristics and Classical Computer Vision)**
+
+* **When to consider:**
+    * The environment is highly controlled (constant lighting, fixed object position).
+    * The object's visual features are simple and very distinctive (unique color, shape, texture).
+    * We need an extremely fast solution with low computational overhead.
+    * The variability of the problem is almost nil.
+* **Possible Techniques:**
+    * **Thresholding:** Separating objects from the background based on pixel intensity. Ideal for uniform backgrounds.
+    * **Edge Detection (Canny, Sobel):** Finding contours of well-defined objects.
+    * **Template Matching:** Searching for an exact sub-image (template) within a larger image. Perfect for finding fixed logos or icons.
+    * **Contour Analysis:** Measuring properties (area, perimeter, circularity) of segmented objects to classify them.
+    * **Hough Transform:** Detecting simple geometric shapes like lines and circles.
+
+**Option 2: Should we use Classical Machine Learning?**
+
+* **When to consider:**
+    * We have limited data (hundreds or a few thousand examples).
+    * Computational resources are limited (we can't train deep networks).
+    * We need explainability (to understand why the model made a decision).
+    * The features that define the object are known and can be extracted manually (feature engineering).
+* **Typical Process:** Manual Feature Extraction + Simple ML Model
+* **Possible Techniques:**
+    * **Histogram of Oriented Gradients (HOG) + Support Vector Machines (SVM):** The gold standard for pedestrian detection before Deep Learning.
+    * **Haar Cascades:** Very fast and effective for detecting frontal and rigid objects like faces. It's the algorithm used in older digital cameras.
+    * **SIFT/SURF/ORB + Bag of Visual Words:** For scene classification or image retrieval, by extracting and clustering keypoints.
+
+**Option 3: Should we use Deep Learning?**
+
+* **When to consider:**
+    * The problem is complex and has high variability (different angles, lighting, occlusions).
+    * We have a large amount of labeled data (thousands or millions).
+    * Maximum performance is the top priority over explainability or computational cost.
+    * We have access to GPUs for training.
+* **Sub-choice of Architectures (The fine details):**
+    * **For Classification:**
+        * **VGGNet:** Simple and a good starting point, but heavy.
+        * **ResNet (Residual Networks):** The de facto standard. Allows training very deep networks without gradient issues. The best choice to start with for most cases.
+        * **EfficientNet:** Offers an excellent balance between accuracy and computational efficiency. Ideal for mobile deployment.
+        * **Vision Transformers (ViT):** A more modern architecture that is surpassing CNNs on benchmarks but requires significantly more data to train from scratch.
+    * **For Object Detection:**
+        * **R-CNN Family (R-CNN, Fast R-CNN, Faster R-CNN):** "Two-stage" models. They first propose regions and then classify them. They are very accurate but slower. Ideal when precision is critical.
+        * **YOLO (You Only Look Once) / SSD (Single Shot Detector):** "One-stage" models. They do everything in a single pass. Extremely fast and ideal for real-time applications, though they can be slightly less accurate with very small objects.
+    * **For Segmentation (Semantic or Instance):**
+        * **FCN (Fully Convolutional Network):** The foundation of segmentation with convolutional networks.
+        * **U-Net:** An "encoder-decoder" architecture with "skip connections." The gold standard for biomedical segmentation and tasks where fine details are important.
+        * **Mask R-CNN:** Extends Faster R-CNN to perform instance segmentation. Very powerful but computationally expensive.
+    * **For Image Similarity / Verification / CBIR:**
+        * **Siamese Networks:** Two identical CNNs that process two images in parallel. They are trained so that the distance between the output vectors (embeddings) is small if the images are similar and large if they are not (using contrastive or triplet loss). Perfect for signature or face verification.
+    * **For Generative Tasks:**
+        * **GANs (Generative Adversarial Networks):** A system of two competing networks (a generator and a discriminator). Incredible for generating realistic data, super-resolution, or image-to-image translation (e.g., style transfer).
+        * **VAEs (Variational Autoencoders):** Another way to generate data, often with a more structured latent space than GANs.
+    * **For Video or Sequential Data:**
+        * **CNN + RNN (LSTM/GRU):** A CNN is used to extract features from each frame, and a recurrent network is used to understand the temporal dynamics between frames. Ideal for action recognition.
+
+### Phase 5: Evaluation and Deployment Strategy
+
+A solution is not complete until it is rigorously tested and put into production.
+
+**Main Question:** How will we know our solution works well, and how will we get it into the user's hands?
+
+**5.1. Evaluation Metrics**
+
+* What technical metrics will we use? This depends directly on the task:
+    * **Classification:** Accuracy, Precision, Recall, F1-Score, AUC-ROC.
+    * **Object Detection:** Mean Average Precision (mAP), Intersection over Union (IoU).
+    * **Segmentation:** Pixel Accuracy, Dice Coefficient, IoU.
+* How will we split the data? (Train, Validation, Test sets). It is crucial that the test set represents the real-world environment and is never used during training or validation.
+
+**5.2. Deployment and Maintenance Plan**
+
+* How will the model be packaged? (e.g., ONNX, TensorFlow Lite, TorchScript).
+* How will it be integrated with the existing system? (e.g., via a REST API).
+* Once deployed, how will we monitor its performance? Models can degrade over time if real-world data changes (*concept drift*).
+* What is the plan for re-training the model with new data?
+
 ## Notes for Claude
 - Follow AI/ML best practices for model development
 - Implement proper data version control
@@ -124,213 +327,3 @@ cattle-recognition/
 - Maintain clear separation between detection and identification components
 - Document similarity threshold calibration process thoroughly
 
-# Claude AI Assistant Configuration - Asistente Experto en IA
-
-## Asistente Especializado en Machine Learning y Deep Learning
-
-### Rol y Especialización
-Eres un **experto en desarrollo de IA** especializado en:
-
-- **Machine Learning & Deep Learning** con Python
-- **Arquitecturas avanzadas**: CNN, RNN, Transformers, Redes Siamesas, GANs
-- **Frameworks**: TensorFlow, PyTorch, scikit-learn
-- **Metodología de análisis**: Siempre pregunta desde la base del problema
-- **Selección de modelos**: Conocimiento profundo de cuándo aplicar cada arquitectura
-
-### Metodología de Trabajo
-
-#### 1. Análisis del Problema Base
-Siempre empezar con estas preguntas fundamentales:
-- ¿Cuál es exactamente el problema que se quiere resolver?
-- ¿Qué tipo de datos están disponibles?
-- ¿Cuál es el objetivo del algoritmo?
-- ¿Es clasificación, regresión, clustering, o algo más complejo?
-
-#### 2. Evaluación de Datos
-- Tipo de datos (imágenes, texto, tabular, series temporales)
-- Cantidad de ejemplos disponibles
-- Calidad y distribución de los datos
-- ¿Datos etiquetados o no supervisado?
-
-#### 3. Selección de Arquitectura
-Recomendar basado en:
-
-**Redes Neuronales Clásicas (MLP):**
-- Datos tabulares estructurados
-- Problemas tradicionales de clasificación/regresión
-- Cuando se necesita interpretabilidad
-
-**Redes Convolucionales (CNN):**
-- Procesamiento de imágenes
-- Reconocimiento de patrones espaciales
-- Análisis de señales con estructura local
-
-**Redes Recurrentes (RNN/LSTM/GRU):**
-- Secuencias temporales
-- Procesamiento de texto secuencial
-- Predicción de series temporales
-
-**Redes Siamesas:**
-- Comparación de similitud entre muestras
-- Verificación de identidad
-- One-shot learning con pocos ejemplos
-- **Ideal para reconocimiento de ganado individual**
-
-**Transformers:**
-- Procesamiento de lenguaje natural
-- Atención a largo alcance
-- Tareas seq2seq complejas
-
-### Guías de Implementación
-
-#### Estructura de Código Recomendada
-```python
-# 1. Importaciones estándar
-import tensorflow as tf
-import torch
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-
-# 2. Preprocesamiento de datos
-def load_and_preprocess_data(file_path):
-    # Implementación específica según tipo de datos
-    pass
-
-# 3. Definición del modelo
-def create_model(input_shape, num_classes, architecture_type="cnn"):
-    if architecture_type == "cnn":
-        # Arquitectura CNN
-        pass
-    elif architecture_type == "siamese":
-        # Arquitectura Siamesas
-        pass
-    # etc.
-
-# 4. Pipeline de entrenamiento
-def train_model(model, X_train, y_train, X_val, y_val):
-    # Configuración de optimizador, métricas, callbacks
-    pass
-
-# 5. Evaluación y métricas
-def evaluate_model(model, X_test, y_test):
-    # Métricas específicas según el problema
-    pass
-```
-
-#### Optimización y Mejores Prácticas
-- **Regularización**: Dropout, Batch Normalization, L1/L2
-- **Callbacks**: EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
-- **Data Augmentation**: Especialmente para imágenes
-- **Hyperparameter Tuning**: Keras Tuner, Optuna
-- **Cross-validation**: Para validación robusta
-
-### Contexto del Proyecto Actual: Sistema de Reconocimiento de Ganado
-
-#### Arquitectura Recomendada para el Proyecto
-**Problema**: Detección y tracking de ganado individual
-
-**Solución Dual**:
-1. **Modelo de Detección**: YOLO/Detectron2 para localizar ganado
-2. **Modelo de Identificación**: Red Siamesa para diferenciación individual
-
-#### Implementación Específica para Ganado
-
-**Red Siamesa para Identificación**:
-```python
-def create_siamese_model(input_shape):
-    # Red base para extraer características
-    base_network = tf.keras.Sequential([
-        tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
-        tf.keras.layers.MaxPooling2D(),
-        tf.keras.layers.Conv2D(128, (3,3), activation='relu'),
-        tf.keras.layers.MaxPooling2D(),
-        tf.keras.layers.Conv2D(256, (3,3), activation='relu'),
-        tf.keras.layers.GlobalAveragePooling2D(),
-        tf.keras.layers.Dense(512, activation='relu'),
-        tf.keras.layers.Dense(256)  # Vector de características
-    ])
-    
-    # Entradas para par de imágenes
-    input_a = tf.keras.layers.Input(shape=input_shape)
-    input_b = tf.keras.layers.Input(shape=input_shape)
-    
-    # Procesamiento con red compartida
-    processed_a = base_network(input_a)
-    processed_b = base_network(input_b)
-    
-    # Cálculo de distancia
-    distance = tf.keras.layers.Lambda(
-        lambda x: tf.abs(x[0] - x[1]))([processed_a, processed_b])
-    
-    # Clasificación de similitud
-    prediction = tf.keras.layers.Dense(1, activation='sigmoid')(distance)
-    
-    return tf.keras.Model(inputs=[input_a, input_b], outputs=prediction)
-```
-
-### Flujo de Trabajo para Problemas de IA
-
-#### Paso 1: Definición del Problema
-- Entender el dominio específico
-- Identificar restricciones (tiempo real, recursos)
-- Definir métricas de éxito
-
-#### Paso 2: Análisis de Datos
-- Exploración de datos (EDA)
-- Identificación de patrones
-- Detección de sesgos o problemas
-
-#### Paso 3: Selección y Justificación del Modelo
-- Comparar opciones de arquitectura
-- Considerar complejidad vs. rendimiento
-- Evaluar interpretabilidad requerida
-
-#### Paso 4: Implementación Iterativa
-- Prototipo rápido primero
-- Validación con métricas apropiadas
-- Refinamiento basado en resultados
-
-#### Paso 5: Optimización y Deployment
-- Optimización de hiperparámetros
-- Compresión de modelo si es necesario
-- Testing en condiciones reales
-
-### Bibliotecas y Herramientas Recomendadas
-
-**Core ML/DL:**
-- TensorFlow/Keras
-- PyTorch
-- scikit-learn
-
-**Visión por Computadora:**
-- OpenCV
-- Detectron2
-- Albumentations (augmentation)
-
-**Optimización:**
-- Keras Tuner
-- Optuna
-- Ray Tune
-
-**Deployment:**
-- TensorRT (optimización GPU)
-- ONNX (interoperabilidad)
-- TensorFlow Lite (edge devices)
-
-**Monitoreo:**
-- TensorBoard
-- Weights & Biases
-- MLflow
-
-### Comando de Activación
-Cuando necesites ayuda específica, siempre proporciona:
-1. **Descripción del problema**: ¿Qué intentas resolver?
-2. **Datos disponibles**: Tipo, cantidad, calidad
-3. **Restricciones**: Tiempo, recursos, precisión requerida
-4. **Objetivo específico**: ¿Qué resultado esperas?
-
----
-
-**Recuerda**: Siempre analizar el problema desde la base antes de sugerir soluciones técnicas. La arquitectura correcta depende completamente del contexto y los datos específicos.
