@@ -19,11 +19,13 @@ The system needs to learn in two distinct ways, requiring two types of data:
 - **Purpose**: Teach the system to answer: "Where is there a cow?"
 
 #### 1.2 Identification Data
-- **Concept**: Gather images of cattle to teach visual differentiation between individuals
+- **Concept**: Learn visual features that distinguish individual cattle without identity labels
 - **Current Data**: Multiple images of different cattle from various angles (cow-counting-v3: 3,371 images)
-- **Approach**: Use diverse cattle images to train model to distinguish unique visual characteristics
-- **Purpose**: Train the model to extract distinctive features and answer: "Are these two images of the same cow or different cows?"
-- **Method**: Implement Siamese Networks or Triplet Loss to learn cattle-specific visual embeddings
+- **Challenge**: No ground truth identity labels available (all cows are random/unrelated)
+- **Approach**: Unsupervised contrastive learning to extract distinctive visual characteristics
+- **Purpose**: Train the model to generate unique "fingerprints" for cattle re-identification
+- **Method**: Self-supervised learning (SimCLR/MoCo) + feature clustering for identity assignment
+- **Technical Note**: Cannot use Siamese/Triplet loss due to lack of positive/negative pairs ground truth
 
 ### Phase 2: System Capability Training
 Build two AI "engines":
@@ -32,8 +34,11 @@ Build two AI "engines":
 - **Concept**: Use first dataset to train a model specialized in locating and drawing bounding boxes around all cattle in an image or video frame
 
 #### 2.2 Differentiation Capability Training
-- **Concept**: Use second dataset to train a model specialized in analyzing single cow images
-- **Output**: Convert unique patterns (spots, shape) into a unique numerical "fingerprint" (feature vector)
+- **Concept**: Use unsupervised learning to train a model specialized in generating distinctive embeddings
+- **Architecture**: ResNet/EfficientNet backbone + contrastive learning head
+- **Training Strategy**: Self-supervised contrastive learning with image augmentations as positive pairs
+- **Output**: Convert cattle visual patterns into unique numerical "fingerprint" (512D feature vector)
+- **Similarity Threshold**: Critical parameter requiring careful calibration during deployment
 
 ### Phase 3: Real-World Optimization
 - **Concept**: Convert and compress trained models to lightweight format
@@ -48,11 +53,12 @@ Main program that uses trained models for the final task:
 2. **Capture**: Receive new video frame
 3. **Detect**: Use first model to find locations of all cattle in frame
 4. **For each cow found**:
-   - **Extract Fingerprint**: Use second model to generate numerical fingerprint
-   - **Compare**: Search database for very similar fingerprint
-   - **Decide**:
-     - If match found: assign existing ID
-     - If no match: consider new cow, generate new ID, add fingerprint to database
+   - **Extract Crop**: Extract cow region using bounding box coordinates
+   - **Generate Fingerprint**: Use identification model to create 512D feature vector
+   - **Similarity Search**: Calculate cosine similarity with all stored fingerprints in database
+   - **Identity Decision**:
+     - If max_similarity > THRESHOLD: assign existing ID with highest similarity
+     - If max_similarity ≤ THRESHOLD: create new cow ID, add fingerprint to database
 5. **Display**: Show cow bounding box with assigned ID on screen
 
 ### Phase 5: Field Testing and Calibration
@@ -321,11 +327,25 @@ A solution is not complete until it is rigorously tested and put into production
 * Once deployed, how will we monitor its performance? Models can degrade over time if real-world data changes (*concept drift*).
 * What is the plan for re-training the model with new data?
 
-## Notes for Claude
+## Technical Implementation Notes for Claude
+
+### Data Constraints
+- **No Identity Ground Truth**: Available cattle images are from random/unrelated individuals
+- **Cannot use supervised ReID methods**: Siamese Networks, Triplet Loss, ArcFace require labeled pairs
+- **Must use unsupervised approaches**: Self-supervised contrastive learning is the only viable option
+
+### Model Architecture Decisions
+- **Detection**: YOLO v8/v9 or Faster R-CNN for cattle bounding box detection
+- **Identification**: ResNet50/EfficientNet + contrastive learning head for feature extraction
+- **Similarity Metric**: Cosine similarity for comparing 512D feature vectors
+- **Threshold Calibration**: Critical parameter requiring extensive field testing
+
+### Development Best Practices
 - Follow AI/ML best practices for model development
 - Implement proper data version control
 - Use modular architecture for easy testing and deployment
 - Focus on real-time performance optimization
 - Maintain clear separation between detection and identification components
 - Document similarity threshold calibration process thoroughly
+- Plan for false positive/negative analysis and threshold tuning
 
