@@ -19,9 +19,11 @@ The system needs to learn in two distinct ways, requiring two types of data:
 - **Purpose**: Teach the system to answer: "Where is there a cow?"
 
 #### 1.2 Identification Data
-- **Concept**: Gather images of specific individuals to teach differentiation
-- **Requirement**: Identify the same cow in multiple photos from various angles
-- **Purpose**: Group images so the model learns to answer: "Are these two images of the same cow or different cows?"
+- **Concept**: Gather images of cattle to teach visual differentiation between individuals
+- **Current Data**: Multiple images of different cattle from various angles (cow-counting-v3: 3,371 images)
+- **Approach**: Use diverse cattle images to train model to distinguish unique visual characteristics
+- **Purpose**: Train the model to extract distinctive features and answer: "Are these two images of the same cow or different cows?"
+- **Method**: Implement Siamese Networks or Triplet Loss to learn cattle-specific visual embeddings
 
 ### Phase 2: System Capability Training
 Build two AI "engines":
