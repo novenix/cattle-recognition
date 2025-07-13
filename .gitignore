@@ -11,8 +11,8 @@ __pycache__/
 *.pyd
 
 # Data directories (large files, not tracked)
-src/data/detection/
-src/data/identification/
+data/detection/
+data/identification/
 
 # Model files (large, generated)
 models/detection/

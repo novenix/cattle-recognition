@@ -23,8 +23,9 @@ def download_roboflow_datasets():
     api_key = "5frUSqpECrA2NkmCyRC5"
     rf = Roboflow(api_key=api_key)
     
-    # Create data directory structure
-    data_dir = Path(__file__).parent.parent / "data" / "detection"
+    # Create data directory structure - go to project root first
+    project_root = Path(__file__).parent.parent.parent  # Go up to project root
+    data_dir = project_root / "data" / "detection"
     data_dir.mkdir(parents=True, exist_ok=True)
     
     # Change to data directory for downloads
