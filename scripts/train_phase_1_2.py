@@ -11,6 +11,14 @@ Usage:
     python scripts/train_phase_1_2.py --help
 """
 
+"""
+python scripts/train_phase_1_2.py
+--dataset-path data/detection/cow-counting-v3
+--epochs 50
+--batch-size 32
+--feature-dim 512
+"""
+
 import os
 import sys
 import argparse
