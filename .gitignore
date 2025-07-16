@@ -16,8 +16,11 @@ data/identification/
 
 # Model files (large, generated)
 models/detection/
-models/identification/
+
 models/optimized/
+
+# Ignore only the best_model.pth file in identification
+models/identification/best_model.pth
 
 # Logs and outputs
 *.log
