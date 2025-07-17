@@ -5,6 +5,19 @@ This file contains configuration and context information for Claude AI assistant
 ## Project Overview
 **Cattle Recognition System** - An automated system for detection and tracking of individual cattle using computer vision and machine learning techniques. The system processes video input to locate each cow and assign unique, persistent identities automatically as they are discovered.
 
+
+## Phase Status Tracking
+All results and progress for each phase are documented in markdown files located in the `phases_status/` directory at the project root:
+
+```
+phases_status/
+├── PHASE_1_1_STATUS.md
+├── PHASE_1_2_STATUS.md
+└── PHASE_2_1_STATUS.md
+```
+
+Refer to these files for detailed status, results, and configuration of each phase.
+
 ## Development Plan - AI Model Development Process
 
 ### Objective
