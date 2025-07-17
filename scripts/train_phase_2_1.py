@@ -9,6 +9,15 @@ This script orchestrates the complete Phase 2.1 process:
 
 Usage:
     python scripts/train_phase_2_1.py --dataset data/detection/cattle-detection-v3
+
+Recommended command for Raspberry Pi deployment (YOLOv11n + CUDA training):
+    python scripts/train_phase_2_1.py \
+      --dataset data/detection/cattle-detection-v3 \
+      --model-size n \
+      --epochs 100 \
+      --batch-size 32 \
+      --device cuda \
+      --export-format onnx
 """
 
 import os
